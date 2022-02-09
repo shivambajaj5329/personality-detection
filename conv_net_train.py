@@ -1,14 +1,4 @@
-"""
-Sample code for
-Convolutional Neural Networks for Sentence Classification
-http://arxiv.org/pdf/1408.5882v2.pdf
-
-Much of the code is modified from
-- deeplearning.net (for ConvNet classes)
-- https://github.com/mdenil/dropout (for dropout)
-- https://groups.google.com/forum/#!topic/pylearn-dev/3QbKtCumAW4 (for Adadelta)
-"""
-import cPickle
+import _pickle as cPickle
 import numpy as np
 from collections import defaultdict, OrderedDict
 import theano
@@ -20,6 +10,9 @@ import sys
 import time
 import getpass
 import csv
+
+from conv_net_classes import LeNetConvPoolLayer, MLPDropout
+
 warnings.filterwarnings("ignore")
 
 #different non-linearities
@@ -75,7 +68,7 @@ def train_conv_net(datasets,
                   ("dropout", dropout_rate), ("batch_size",batch_size),("non_static", non_static),
                     ("learn_decay",lr_decay), ("conv_non_linear", conv_non_linear), ("non_static", non_static)
                     ,("sqr_norm_lim",sqr_norm_lim),("shuffle_batch",shuffle_batch)]
-    print parameters
+    print (parameters)
 
     #define model architecture
     index = T.lscalar()
@@ -89,7 +82,7 @@ def train_conv_net(datasets,
 
     conv_layers = []
 
-    for i in xrange(len(filter_hs)):
+    for i in range(len(filter_hs)):
         filter_shape = filter_shapes[i]
         pool_size = pool_sizes[i]
         conv_layer = LeNetConvPoolLayer(rng, image_shape=None,
@@ -206,7 +199,7 @@ def train_conv_net(datasets,
 
 
     #start training over mini-batches
-    print '... training'
+    print ('... training')
     epoch = 0
     best_val_perf = 0
     val_perf = 0
@@ -221,12 +214,12 @@ def train_conv_net(datasets,
                 cost_epoch = train_model(minibatch_index)
                 set_zero(zero_vec)
         else:
-            for minibatch_index in xrange(n_train_batches):
+            for minibatch_index in range(n_train_batches):
                 cost_epoch = train_model(minibatch_index)
                 set_zero(zero_vec)
-        train_losses = [test_model(i) for i in xrange(n_train_batches)]
+        train_losses = [test_model(i) for i in range(n_train_batches)]
         train_perf = 1 - np.mean([loss[0] for loss in train_losses])
-        val_losses = [val_model(i) for i in xrange(n_val_batches)]
+        val_losses = [val_model(i) for i in range(n_val_batches)]
         val_perf = 1- np.mean(val_losses)
         epoch_perf = 'epoch: %i, training time: %.2f secs, train perf: %.2f %%, val perf: %.2f %%' % (epoch, time.time()-start_time, train_perf * 100., val_perf*100.)
         print(epoch_perf)
@@ -236,7 +229,7 @@ def train_conv_net(datasets,
             best_val_perf = val_perf
             test_loss_list = [test_model_all(test_set_x[idx*batch_size:(idx+1)*batch_size], test_set_y[idx*batch_size:(idx+1)*batch_size],
             test_set_m[idx*batch_size:(idx+1)*batch_size]##mairesse_change
-            ) for idx in xrange(test_batches)]
+            ) for idx in range(test_batches)]
             if test_set_x.shape[0]>test_batches*batch_size:
                 test_loss_list.append(test_model_all(test_set_x[test_batches*batch_size:], test_set_y[test_batches*batch_size:],
                 test_set_m[test_batches*batch_size:]##mairesse_change
@@ -253,7 +246,7 @@ def train_conv_net(datasets,
             svm_test=np.concatenate([t[-1] for t in test_loss_list_temp], axis=0)
             svm_train=np.concatenate([t[1] for t in train_losses], axis=0)
             output="Test result: accu: "+str(test_perf)+", macro_fscore: "+str(fscore)+"\ntp: "+str(tp)+" tn:"+str(tn)+" fp: "+str(fp)+" fn: "+str(fn)
-            print output
+            print (output)
             ofile.write(output+"\n")
             ofile.flush()
             # dump train and test features
@@ -262,7 +255,7 @@ def train_conv_net(datasets,
         updated_epochs = refresh_epochs()
         if updated_epochs!=None and n_epochs!=updated_epochs:
             n_epochs = updated_epochs
-            print 'Epochs updated to '+str(n_epochs)
+            print ('Epochs updated to '+str(n_epochs))
     return test_perf, fscore
 
 def refresh_epochs():
@@ -282,7 +275,6 @@ def refresh_epochs():
 
 def shared_dataset(data_xy, borrow=True):
         """ Function that loads the dataset into shared variables
-
         The reason we store our dataset in shared variables is to allow
         Theano to copy it into the GPU memory (when code is run on GPU).
         Since copying data into the GPU is slow, copying a minibatch everytime
@@ -366,7 +358,7 @@ def get_idx_from_sent(status, word_idx_map, charged_words, max_l=51, max_s=200, 
                 if np.random.randint(0,2)==0:
                     continue
             y=[]
-            for i in xrange(pad):
+            for i in range(pad):
                 y.append(0)
             for word in words:
                 if word in word_idx_map:
@@ -412,30 +404,30 @@ def make_idx_data_cv(revs, word_idx_map, mairesse, charged_words, cv, per_attr=0
 
 
 if __name__=="__main__":
-    print "loading data...",
+    print ("loading data...")
     x = cPickle.load(open("essays_mairesse.p","rb"))
     revs, W, W2, word_idx_map, vocab, mairesse = x[0], x[1], x[2], x[3], x[4], x[5]
-    print "data loaded!"
+    print ("data loaded!")
     mode= sys.argv[1]
     word_vectors = sys.argv[2]
     attr = int(sys.argv[3])
     if mode=="-nonstatic":
-        print "model architecture: CNN-non-static"
+        print ("model architecture: CNN-non-static")
         non_static=True
     elif mode=="-static":
-        print "model architecture: CNN-static"
+        print ("model architecture: CNN-static")
         non_static=False
-    execfile("conv_net_classes.py")
+    exec(open("conv_net_classes.py").read())
     if word_vectors=="-rand":
-        print "using: random vectors"
+        print ("using: random vectors")
         U = W2
     elif word_vectors=="-word2vec":
-        print "using: word2vec vectors"
+        print ("using: word2vec vectors")
         U = W
 
     r = range(0,10)
 
-    ofile=file('perf_output_'+str(attr)+'.txt','w')
+    ofile=open('perf_output_'+str(attr)+'.txt','w')
 
     charged_words=[]
 
@@ -475,14 +467,14 @@ if __name__=="__main__":
                               dropout_rate=[0.5, 0.5, 0.5],
                               activations=[Sigmoid])
         output = "cv: " + str(i) + ", perf: " + str(perf)+ ", macro_fscore: " + str(fscore)
-        print output
+        print (output)
         ofile.write(output+"\n")
         ofile.flush()
         results.append([perf, fscore])
     results=np.asarray(results)
     perf_out = 'Perf : '+str(np.mean(results[:, 0]))
     fscore_out = 'Macro_Fscore : '+str(np.mean(results[:, 1]))
-    print perf_out
-    print fscore_out
+    print (perf_out)
+    print (fscore_out)
     ofile.write(perf_out+"\n"+fscore_out)
     ofile.close()

@@ -1,19 +1,8 @@
-"""
-Sample code for
-Convolutional Neural Networks for Sentence Classification
-http://arxiv.org/pdf/1408.5882v2.pdf
-
-Much of the code is modified from
-- deeplearning.net (for ConvNet classes)
-- https://github.com/mdenil/dropout (for dropout)
-- https://groups.google.com/forum/#!topic/pylearn-dev/3QbKtCumAW4 (for Adadelta)
-"""
-
 import numpy
 import theano.tensor.shared_randomstreams
 import theano
 import theano.tensor as T
-from theano.tensor.signal import downsample
+from theano.tensor.signal.pool import pool_2d as downsample
 from theano.tensor.nnet import conv
 
 def ReLU(x):
@@ -174,7 +163,6 @@ class MLPDropout(object):
 
 class MLP(object):
     """Multi-Layer Perceptron Class
-
     A multilayer perceptron is a feedforward artificial neural network model
     that has one layer or more of hidden units and nonlinear activations.
     Intermediate layers usually have as activation function tanh or the
@@ -185,25 +173,19 @@ class MLP(object):
 
     def __init__(self, rng, input, n_in, n_hidden, n_out):
         """Initialize the parameters for the multilayer perceptron
-
         :type rng: numpy.random.RandomState
         :param rng: a random number generator used to initialize weights
-
         :type input: theano.tensor.TensorType
         :param input: symbolic variable that describes the input of the
         architecture (one minibatch)
-
         :type n_in: int
         :param n_in: number of input units, the dimension of the space in
         which the datapoints lie
-
         :type n_hidden: int
         :param n_hidden: number of hidden units
-
         :type n_out: int
         :param n_out: number of output units, the dimension of the space in
         which the labels lie
-
         """
 
         # Since we are dealing with a one hidden layer MLP, this will translate
@@ -237,7 +219,6 @@ class MLP(object):
 
 class LogisticRegression(object):
     """Multi-class Logistic Regression Class
-
     The logistic regression is fully described by a weight matrix :math:`W`
     and bias vector :math:`b`. Classification is done by projecting data
     points onto a set of hyperplanes, the distance to which is used to
@@ -246,19 +227,15 @@ class LogisticRegression(object):
 
     def __init__(self, input, n_in, n_out, W=None, b=None):
         """ Initialize the parameters of the logistic regression
-
     :type input: theano.tensor.TensorType
     :param input: symbolic variable that describes the input of the
     architecture (one minibatch)
-
     :type n_in: int
     :param n_in: number of input units, the dimension of the space in
     which the datapoints lie
-
     :type n_out: int
     :param n_out: number of output units, the dimension of the space in
     which the labels lie
-
     """
 
         # initialize with 0 the weights W as a matrix of shape (n_in, n_out)
@@ -290,17 +267,13 @@ class LogisticRegression(object):
     def negative_log_likelihood(self, y):
         """Return the mean of the negative log-likelihood of the prediction
         of this model under a given target distribution.
-
     .. math::
-
     \frac{1}{|\mathcal{D}|} \mathcal{L} (\theta=\{W,b\}, \mathcal{D}) =
     \frac{1}{|\mathcal{D}|} \sum_{i=0}^{|\mathcal{D}|} \log(P(Y=y^{(i)}|x^{(i)}, W,b)) \\
     \ell (\theta=\{W,b\}, \mathcal{D})
-
     :type y: theano.tensor.TensorType
     :param y: corresponds to a vector that gives for each example the
     correct label
-
     Note: we use the mean instead of the sum so that
     the learning rate is less dependent on the batch size
     """
@@ -319,7 +292,6 @@ class LogisticRegression(object):
     def errors(self, y):
         """Return a float representing the number of errors in the minibatch ;
     zero one loss over the size of the minibatch
-
     :type y: theano.tensor.TensorType
     :param y: corresponds to a vector that gives for each example the
     correct label
@@ -343,21 +315,16 @@ class LeNetConvPoolLayer(object):
     def __init__(self, rng, filter_shape, image_shape, poolsize=(2, 2), non_linear="tanh"):
         """
         Allocate a LeNetConvPoolLayer with shared variable internal parameters.
-
         :type rng: numpy.random.RandomState
         :param rng: a random number generator used to initialize weights
-
         :type input: theano.tensor.dtensor4
         :param input: symbolic image tensor, of shape image_shape
-
         :type filter_shape: tuple or list of length 4
         :param filter_shape: (number of filters, num input feature maps,
                               filter height,filter width)
-
         :type image_shape: tuple or list of length 4
         :param image_shape: (batch size, num input feature maps,
                              image height, image width)
-
         :type poolsize: tuple or list of length 2
         :param poolsize: the downsampling (pooling) factor (#rows,#cols)
         """
@@ -418,4 +385,3 @@ class LeNetConvPoolLayer(object):
             pooled_out = downsample.max_pool_2d(input=conv_out, ds=self.poolsize, ignore_border=True)
             output = pooled_out + self.b.dimshuffle('x', 0, 'x', 'x')
         return output
-

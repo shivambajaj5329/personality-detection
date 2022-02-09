@@ -10,10 +10,14 @@ This code implements the model discussed in [Deep Learning-Based Document Modeli
 
 
 ## Requirements
+```sh
+pip install -r requirements.txt
+```
 
--   Python 2.7
--   Theano 0.7 (Tested)
--   Pandas 18.0 (Tested)
+-   Python 3.8
+-   Theano 1.0.5 
+-   Pandas 1.4.0
+-   Numpy 1.20.3 (important, as newer versions throw error)
 -   Pre-trained [GoogleNews word2vec](https://drive.google.com/file/d/0B7XkCwpI5KDYNlNUTTlSS21pQmM/edit) vector
 
 
